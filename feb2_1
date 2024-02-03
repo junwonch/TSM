@@ -1,0 +1,27 @@
+height_cm <- c(150,160,170,180)
+class(height_cm)
+name <- c("a","b","c","d")
+class(name)
+boolean <- c(FALSE, FALSE, TRUE,TRUE)
+class(boolean)
+height_cm[-2:-4]
+length(height_cm)
+height_cm + 10
+height_cm * 10
+height_cm >= 160
+is_greater160 <- height_cm >= 160
+class(is_greater160)
+typeof(is_greater160)
+
+baz <- c(1L,2L)
+typeof(baz)
+
+bar <- c(1L,2L,3)
+typeof(bar)
+
+bat <- c(FALSE, TRUE, "a","b")
+typeof(bat)
+
+bay <- c(FALSE, TRUE, "ab")
+typeof(bay)
+#test
