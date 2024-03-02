@@ -1,1 +1,69 @@
+trafficstops <- ms
 
+# trafficstops <- read.csv("traffic_stops.csv")
+trafficstops <- read.csv("traffic_stop.csv")
+class(trafficstops)
+str(trafficstops)
+trafficstops1 <- read.csv("traffic_stop.csv", stringsAsFactors = TRUE)
+str(trafficstops1)
+str(trafficstops)
+summary(trafficstops1)
+df <- trafficstops1
+unique(df$county_name)
+levels(df$county_name)[c(1,3,5)]
+c(1,3,5)
+3,2
+1:10
+nlevels(df$county_name)
+df[1:10, 3]
+colnames(df)
+stop_date <- NA
+stop_date
+df[1:5, stop_date]
+str(df)
+df[,"police_department"]
+df[,]
+df[1:5,"police_department"]
+nlevels(df$police_department)
+df[df$driver_gender == "F",]
+class(df)
+
+str(df)
+library(lubridate)
+df$stop_date
+df$stop_date1 <- ymd(df$stop_date)
+df$stop_date1
+df$driver_birthdate <- ymd(df$driver_birthdate)
+?lubridate
+str(df)
+year(df$stop_date)
+month(df$stop_date)
+day(df$stop_date)
+df$age_at_stop <- year(df$stop_date1) - year(df$driver_birthdate)
+df$age_at_stop
+class(df$age_at_stop)
+str(df)
+df$age_at_stop <- as.factor(df$age_at_stop)
+table(df$age_at_stop)
+plot(table(df$age_at_stop))
+nrow(df)
+tail(df)
+tail(df,10)
+head(df,10)
+df[nrow(df)-10:nrow(df),]
+df$county_name %in% c("Hancock County", "Harrison County", "Jackson County")
+coastal_counties <- df[df$county_name %in% c("Hancock County", "Harrison County", "Jackson County"),]
+unique(coastal_counties$county_name)
+levels(coastal_counties$county_name)[1]
+table(coastal_counties$driver_race)["Black"]
+
+typeof(table(coastal_counties$driver_race)["Black"])
+class(table(coastal_counties$driver_race))
+coastal_county_ratio <- table(coastal_counties$driver_race)["Black"] / table(coastal_counties$driver_race)["White"]
+coastal_county_ratio
+bc <- nrow(coastal_counties[coastal_counties$driver_race == "Black",])
+wc <- nrow(coastal_counties[coastal_counties$driver_race == "White",])
+ratio <- bc/wc
+ratio
+f <- factor(c(1990, 1983, 1977, 1998, 1990))
+f
