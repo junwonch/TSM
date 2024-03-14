@@ -1,0 +1,89 @@
+library(dplyr)
+starwars
+nrow(starwars)
+ncol(starwars)
+names(starwars)
+starwars$species
+str(starwars)
+summary(starwars)
+data(starwars)
+df <- starwars
+df
+summary(df)
+df[,"films"][[1]]
+typeof(df$films)
+typeof(df$species)
+length(unique(df$species))
+df$species <- as.factor(df$species)
+levels(df$species)
+df$species
+table(df$species)
+unique(df$sex)
+table(df$sex)
+plot(table(df$sex))
+
+sum(is.na(df$sex))
+unique(df$hair_color)
+table(df$hair_color)
+typeof(df$hair_color)
+plot(table(df$hair_color))
+
+unique(df$skin_color)
+table(df$skin_color)
+df$hair_color <- as.factor(df$hair_color)
+df$skin_color <- as.factor(df$skin_color)
+df$eye_color <- as.factor(df$eye_color)
+typeof(df$birth_year)
+typeof(df$height)
+typeof(df$mass)
+unique(df$gender)
+unique(df$homeworld)
+unique(df$species)
+df$gender <- as.factor(df$gender)
+df$homeworld <- as.factor(df$homeworld)
+selectColums <- names(df)[1:11]
+selectColums
+df.select <- df %>%
+  select(all_of(selectColums))
+df.select
+
+data("mtcars")
+summary(mtcars)
+
+mtcars %>%
+  group_by(cyl) %>%
+  summarise(mean = mean(disp),n=n()) 
+
+#calculate the aggregated mass norm by species
+test <- df %>%
+  select(name, mass, species) %>%
+  group_by(species) %>%
+  summarise(mass_norm = mass / mean(mass, na.rm = TRUE), count = n()) %>%
+  arrange(-count)
+
+df
+a <- df %>%
+  select(species, mass) %>%
+  filter(species == "Human")
+a
+
+human <- df$species == "Human"
+human
+df[,"species"]
+df[df$species == "Human",c("species","mass")]
+
+
+df$species[human]
+length(df$species[human])
+
+df$mass[human]
+length(df$species[human])
+
+test
+names(df)
+df.select <- df %>%
+  select(-films,-vehicles,-starships)
+str(df.select)
+summary(df.select)
+df$sex <- as.factor(df$sex)
+?str
