@@ -1,0 +1,41 @@
+library(sp)
+library(sf)
+?Line
+?runif
+runif(6)
+runif(6, 0, 100)
+matrix(runif(6), ncol=2)
+lnstr_1 <- st_linestring(matrix(runif(6), ncol=2))
+lnstr_2 <- st_linestring(matrix(runif(6), ncol=2))
+lnstr_sfc <- st_sfc(lnstr_1, lnstr_2)
+lnstr_sfc
+dfr <- data.frame(id = c("hwy1","hwy2"), cars_per_hour = c(78,22))
+lnstr_fd <- st_sf(dfr, lnstr_sfc)
+lnstr_fd
+methods(class="sf")
+
+ln1 <- Line(matrix(runif(6), ncol=2))
+ln2 <- Line(matrix(runif(6), ncol=2))
+class(ln1)
+str(ln1)
+lns1 <- Lines(list(ln1), ID = c("hwy1")) 
+lns2 <- Lines(list(ln2), ID = c("hwy2")) 
+str(lns1)
+lns1@Lines
+lns1@ID
+sp_lns <- SpatialLines(list(lns1, lns2))
+str(sp_lns)
+class(sp_lns@proj4string@projargs)
+
+dfr <- data.frame(id = c("hwy1", "hwy2"), # note how we use the same IDs from above!
+                  cars_per_hour = c(78, 22)) 
+dfr
+sp_lns@lines
+sp_lns_dfr <- SpatialLinesDataFrame(sp_lns, dfr, match.ID = "id")
+str(sp_lns_dfr)
+sp_lns_dfr@data
+sp_lns_dfr@lines[[2]]@Lines[[1]][1,1]
+sp_lns_dfr@lines[[2]]@ID
+sp_lns_dfr@lines[[2]][1,1]
+spplot(sp_lns_dfr)
+plot(sp_lns_dfr)           
