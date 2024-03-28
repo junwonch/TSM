@@ -1,0 +1,35 @@
+library(sp)
+library(sf)
+library(dplyr)
+getwd()
+
+philly <- read.csv("C:/Users/junwo/OneDrive/Desktop/TSM/philly_homicides.csv")
+philly
+ncol(philly)
+colnames(philly)
+nrow(philly)
+summary(philly)
+
+philly_sf <- st_as_sf(philly, coords = c("POINT_X", "POINT_Y"))
+names(philly_sf)
+typeof(philly_sf)
+class(philly_sf)
+
+st_crs(philly_sf) <- 4326
+st_crs(philly_sf)
+st_crs(philly_sf)$proj4string
+st_write(philly_sf, "philly", driver = "ESRI Shapefile")
+philly_sf2 <- st_read("philly")
+str(philly_sf2)
+plot(philly_sf2)
+plot(st_geometry(philly_sf2))
+
+philly_sf3 <- st_read("data/Philly")
+plot(philly_sf3)
+plot(st_geometry(philly_sf3))
+
+colnames(philly_sf3)
+philly_sf3 %>%
+  filter(medHHinc > 60000) %>%
+  st_geometry() %>%
+  plot(col="red", add=T)
