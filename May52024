@@ -1,0 +1,145 @@
+library(sf)
+library(dplyr)
+
+
+getwd()
+setwd("C:/Users/junwo/Documents/TSM Local")
+fia <- read.csv("tree_raw_data_with_env_cleaned.csv")
+nrow(fia)
+colnames(fia)
+head(fia,10)
+tail(fia,10)
+fia_s <- fia %>%
+  sample_frac(0.1)
+nrow(fia_s)
+head(fia_s)
+names(fia_s)
+selectcolumns <- names(fia_s)[c(3,5,7,8,4,11,12,13,14,37,38,40)]
+selectcolumns
+fia_ss <- fia_s %>%
+  select(all_of(selectcolumns))
+fia_ss
+head(fia_ss)
+nrow(fia_ss)
+write.csv(fia_ss,"fia_subset.csv")
+
+fia <- fia_ss
+# covert num to factor for statecd, spcd, spgrpcd
+fia_ss$statecd <- as.factor(fia_ss$statecd)
+fia_ss$spcd <- as.factor(fia_ss$spcd)
+fia_ss$spgrpcd <- as.factor(fia_ss$spgrpcd)
+fia_ss$common <- as.factor(fia_ss$common)
+str(fia_ss)
+ref_species <- read.csv("REF_SPECIES.csv")
+head(ref_species)
+ref_species <- ref_species[,c(1,2,3,4)]
+length(unique(ref_species$COMMON_NAME))
+unique(ref_species$COMMON_NAME)
+nrow(fia)
+fia_sss <- merge(fia_ss, ref_species, by.x = "spcd", by.y = "SPCD", all.x = TRUE)
+head(fia_sss)
+nrow(fia_sss)
+statecd <- read.csv("stateAbbr.csv")
+head(statecd,30)
+fia_sss <- merge(fia_sss, statecd, by.x = "statecd", by.y = "STATECD", all.x = TRUE)
+head(fia_sss)
+nrow(fia)
+ncol(fia_sss)
+fia_sss[,3:ncol(fia_sss)]
+3:17
+c(3:17)
+head(fia_sss[,c(3,4,5,1,2,6:ncol(fia_sss))])
+head(fia_sss[,-c(12)])
+boo <- c(1:10)
+boo[-c(10)]
+names(fia)
+fia <- fia[,c(3, 4,5,6,2,1,7,8,9,10,11,12,13,15)]
+names(fia)
+head(fia)
+#####
+fia_sss %>%
+  group_by(Abbr) %>%
+  summarise(richness = n_distinct(spcd)) %>%
+  arrange(-richness)
+
+
+
+species_richness <- function(data) {
+  richness_df <- data %>%
+    group_by(Abbr) %>%
+    summarise(richness = n_distinct(spcd)) %>%
+    arrange(-richness) %>%
+    slice(1:5)
+  return(richness_df)
+}
+
+species_richness(fia_sss)
+
+#### modify function
+
+
+species_richness_state <- function(data, state = NULL) {
+  richness_df <- data %>%
+    group_by(Abbr) %>%
+    summarise(richness = n_distinct(spcd)) %>%
+    arrange(-richness)
+  
+    if (!is.null(state)){
+      richness_df <- richness_df %>% filter(Abbr %in% state)
+    }
+  return(richness_df)
+}
+species_richness_state(fia_sss, c("TN", "MS", "MI"))
+
+state = NULL
+!is.null(state)
+if (!is.null(state)){
+  richness_df <- fia %>% filter(Abbr == state)}
+richness_df  
+
+trees_ht <- function(data, height){
+  return(subset(data, ht > height))
+}
+trees_ht <- function(data, height){
+    fia_ht <- fia_sss %>% 
+      filter(ht > height)
+    return(fia_ht)
+}
+?subset
+trees_dia <- function(data, name, diameter){
+  tree_name <- data %>%
+    filter(common == name)
+  tree_diam <- tree_name %>%
+    filter(dia > diameter)
+  return(tree_diam)
+}
+
+trees_dia <- function(data, name, diameter){
+  tree_name <- data %>%
+    filter(common == name & dia > diameter)
+  return(tree_name)
+}
+
+
+nrow(trees_dia(fia_sss, "sweetbay", 10))
+
+nrow(trees_ht(fia_sss, 30))
+nrow(fia_sss)
+trees_ht1 <- function(data, height){
+  return(data[data$ht>height,])
+}
+
+
+tree50_subset <- trees_ht(fia, 50)
+nrow(tree50)
+summary(tree50_subset)
+tree50_bracket <- trees_ht1(fia, 50)
+nrow(tree50)
+summary(tree50_bracket)
+
+library(maps)
+states <- maps::map("state")
+head(states)
+class(states)
+states
+ggplot()
