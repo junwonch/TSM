@@ -1,0 +1,47 @@
+names(fia)
+getwd()
+states_sf <- st_read("Archive/states.shp")
+plot(states_sf)
+plot(st_geometry(states_sf))
+names(states_sf)
+head(states_sf)
+species_richness(fia)
+richness_by_state <- species_richness(fia)
+richness_by_state
+nrow(richness_by_state)
+
+species_richness <- function(data) {
+  richness_df <- data %>%
+    group_by(Abbr) %>%
+    summarise(richness = n_distinct(spcd)) %>%
+    arrange(-richness)
+  return(richness_df)
+}
+
+merge_df_left <- left_join(states_sf, richness_by_state, by = c("STATE_ABBR" = "Abbr"))
+head(merge_df_left)
+class(merge_df_left)
+
+
+dev.off()
+pdf("richnessPlot1.pdf")
+?pdf
+
+ggplot(data = merge_df_left) +
+  geom_sf(aes(fill = richness)) +
+  scale_fill_gradient(low = "white", high = "blue", na.value = "grey50", name = "Species Richness") +
+  #  theme_minimal() +
+  labs(title = "Species richness by states", subtitle = "based on fia db") +
+  theme(legend.position = "bottom")
+dev.off()
+
+head(fia)
+nrow(fia)
+
+
+getwd()
+setwd("C:/Users/junwo/Documents/TSM Local/Archive")
+
+states_sf <- st_read("states.shp")
+plot(states_sf)
+plot(st_geometry(states_sf))
