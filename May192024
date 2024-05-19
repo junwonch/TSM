@@ -1,0 +1,77 @@
+# creating 20km by 20 km fishnet and append the centroid to FIA db
+library(sf)
+library(dplyr)
+getwd()
+setwd("C:/Users/junwo/Documents/TSM Local")
+fia <- read.csv("tree_raw_data_with_env_cleaned.csv")
+head(fia)
+nrow(fia)
+names(fia)
+
+fia10 <- fia %>%
+  sample_frac(0.1) %>%
+  select(TREEcn, plt_cn,  invyr,  statecd, spcd, dia, ht, lat, long)
+head(fia10)
+
+fia <- fia10
+head(fia10)
+
+fia_sf <- st_as_sf(fia, coords = c("long", "lat"), crs = 4326)
+class(fia_sf)
+head(fia_sf)
+
+plot(st_geometry(fia_sf),cex = 0.2)
+fia_sf_albers <- st_transform(fia_sf, crs = "ESRI:102008")
+st_crs(fia_sf_albers)
+plot(st_geometry(fia_sf_albers))
+
+extent <- st_bbox(fia_sf_albers)
+extent
+
+grid <- st_make_grid(st_as_sfc(extent), crs = "ESRI:102008", cellsize = c(20000,20000), square = TRUE)
+plot(grid)
+class(grid)
+grid_sf <- st_sf(id = 1:length(grid), geometry = grid)
+class(grid_sf)
+head(grid_sf)
+
+overlaps <- st_join(fia_sf_albers, grid_sf)
+class(overlaps)
+head(overlaps)
+centroids_albers <- st_centroid(grid_sf$geometry)
+centroids_albers
+head(overlaps)
+length(overlaps$id)
+length(unique(overlaps$id))
+id1 <- unique(overlaps$id)
+id1
+centroids_albers <- st_centroid(grid_sf[grid_sf$id %in% id1,]$geometry)
+length(centroids_albers)
+class(centroids_albers)
+length(centroids_albers)
+head(centroids_albers)
+head(overlaps)
+centroids_wgs84 <- st_transform(centroids_albers, crs = 4326)
+head(centroids_wgs84)
+class(centroids_wgs84)
+centroid_wgs84_coords <- st_coordinates(centroids_wgs84)
+class(centroid_wgs84_coords)
+
+gridid <- grid_sf[grid_sf$id %in% id1,]$id
+class(gridid)
+id1
+nrow(centroid_wgs84_coords)
+length(gridid)
+centroid_wgs84_coords[,3] <- gridid # this is not working
+head(centroid_wgs84_coords)
+centroid_df <- data.frame(
+  GRIDID = gridid,
+  centroid_long = centroid_wgs84_coords[,"X"],
+  centroid_lat = centroid_wgs84_coords[,"Y"]
+)
+head(centroid_df)
+head(fia)
+head(overlaps)
+fia_grid <- merge(overlaps, centroid_df, by.x = "id", by.y = "GRIDID", all.x = TRUE)
+head(fia_grid)
+nrow(fia_grid)
