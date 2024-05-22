@@ -1,0 +1,82 @@
+fia_grid_df <- as.data.frame(fia_grid)
+class(fia_grid_df)
+head(fia_grid_df)
+head(ref)
+fia_grid_df1 <- merge(fia_grid_df, ref, by.x = "spcd", by.y = "SPCD", all.x = TRUE)
+summary(fia_grid_df1)
+fia_grid_df <- fia_grid_df1
+str(fia_grid_df)
+summary(fia_grid_df)
+nrow(fia_grid_df[is.na(fia_grid_df["centroid_long"]),])
+
+fia_grid_total_count <- fia_grid_df %>%
+  group_by(id, centroid_long, centroid_lat) %>%
+  summarise(Total_tree_count = n_distinct(X)) %>%
+  arrange(id)
+head(fia_grid_total_count)
+head(fia_grid_df)
+
+fia_grid_spcd_tree_count <- fia_grid_df %>%
+  group_by(id, spcd, COMMON_NAME, centroid_long, centroid_lat) %>%
+  summarise(SPCD_tree_count = n_distinct(X))
+
+head(fia_grid_total_count)
+nrow(fia_grid_total_count)
+head(fia_grid_spcd_tree_count, 30)
+fia_grid_spcd_tree_count[1:30,]
+
+fia_grid_frequency <- merge(fia_grid_spcd_tree_count, fia_grid_total_count, by = "id", all.x = TRUE)
+head(fia_grid_frequency)
+fia_grid_frequency <- fia_grid_frequency %>%
+  mutate(frequency = SPCD_tree_count/Total_tree_count * 100)
+
+head(fia_grid_frequency)
+fia_grid_frequency <- merge(fia_grid_frequency, ref[,2:3], by.x = "spcd", by.y = "SPCD", all.x = TRUE)
+
+
+common_name <- unique(fia_grid_frequency$COMMON_NAME)
+common_name
+common_name1
+common_name <- tolower(common_name)
+common_name <- gsub("\\s+", " ", common_name)
+sort(common_name)
+
+ggplot(data = fia_grid_frequency[fia_grid_frequency$COMMON_NAME == "white oak",]) +
+  geom_point(aes(x = centroid_long.x, y = centroid_lat.x, color = frequency))
+
+dev.off()
+
+######
+percent_frequency <- function(species_name){
+  ggplot(data = fia_grid_frequency[fia_grid_frequency$COMMON_NAME == species_name,]) +
+    geom_point(aes(x = centroid_long.x, y = centroid_lat.x, color = frequency))
+}
+percent_frequency("red maple")
+
+######
+percent_frequency <- function(datainput,species_name){
+  fia_grid <- datainput
+  fia_grid_df <- as.data.frame(fia_grid)
+  fia_grid_df1 <- merge(fia_grid_df, ref, by.x = "spcd", by.y = "SPCD", all.x = TRUE)
+  fia_grid_df <- fia_grid_df1
+
+  fia_grid_total_count <- fia_grid_df %>%
+    group_by(id, centroid_long, centroid_lat) %>%
+    summarise(Total_tree_count = n_distinct(X)) %>%
+    arrange(id)
+
+  fia_grid_spcd_tree_count <- fia_grid_df %>%
+    group_by(id, spcd, COMMON_NAME, centroid_long, centroid_lat) %>%
+    summarise(SPCD_tree_count = n_distinct(X))
+  
+  fia_grid_frequency <- merge(fia_grid_spcd_tree_count, fia_grid_total_count, by = "id", all.x = TRUE)
+  fia_grid_frequency <- fia_grid_frequency %>%
+    mutate(frequency = SPCD_tree_count/Total_tree_count * 100)
+  
+  p <- ggplot(data = fia_grid_frequency[fia_grid_frequency$COMMON_NAME == species_name,]) +
+    geom_point(aes(x = centroid_long.x, y = centroid_lat.x, color = frequency))
+  return(p)
+}
+
+head(fia_grid)
+percent_frequency(fia_grid, "red maple")
