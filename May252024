@@ -1,0 +1,190 @@
+library(sf)
+library(ggplot2)
+library(dplyr)
+
+getwd()
+setwd("C:/Users/junwo/Documents/TSM Local")
+fia <- read.csv("tree_raw_data_with_env_cleaned.csv")
+
+ref <- read.csv("REF_SPECIES.csv")
+
+dup <- fia %>%
+  group_by(TREEcn)%>%
+  arrange(TREEcn)%>%
+  filter(n()>1)
+
+fia10 <- fia %>%
+  sample_frac(0.1) %>%
+  select(X, TREEcn, plt_cn,  invyr,  statecd, spcd, dia, ht, lat, long)
+fia <- fia10
+
+fia_sf <- st_as_sf(fia, coords = c("long", "lat"), crs = 4326)
+class(fia_sf)
+
+fia_sf_albers <- st_transform(fia_sf, crs = "ESRI:102008")
+
+extent <- st_bbox(fia_sf_albers)
+
+grid <- st_make_grid(st_as_sfc(extent), crs = "ESRI:102008", cellsize = c(20000,20000), square = TRUE)
+plot(grid)
+grid_sf <- st_sf(id = 1:length(grid), geometry = grid)
+
+overlaps <- st_join(fia_sf_albers, grid_sf)
+?st_join
+centroids_albers <- st_centroid(grid_sf$geometry)
+
+id1 <- unique(overlaps$id)
+
+centroids_albers <- st_centroid(grid_sf[grid_sf$id %in% id1,]$geometry)
+
+centroids_wgs84 <- st_transform(centroids_albers, crs = 4326)
+
+centroid_wgs84_coords <- st_coordinates(centroids_wgs84)
+
+gridid <- grid_sf[grid_sf$id %in% id1,]$id
+
+centroid_df <- data.frame(
+  GRIDID = id1,
+  centroid_long = centroid_wgs84_coords[,"X"],
+  centroid_lat = centroid_wgs84_coords[,"Y"]
+)
+
+fia_grid <- merge(overlaps, centroid_df, by.x = "id", by.y = "GRIDID", all.x = TRUE)
+
+fia_grid_df <- as.data.frame(fia_grid)
+fia_grid_df1 <- merge(fia_grid_df, ref, by.x = "spcd", by.y = "SPCD", all.x = TRUE)
+fia_grid <- fia_grid_df1
+
+fia_grid_total_count <- fia_grid_df %>%
+  group_by(id, centroid_long, centroid_lat) %>%
+  summarise(Total_tree_count = n_distinct(X)) %>%
+  arrange(id)
+
+fia_grid_spcd_tree_count <- fia_grid_df %>%
+  group_by(id, spcd, centroid_long, centroid_lat) %>%
+  summarise(SPCD_tree_count = n_distinct(TREEcn))
+
+fia_grid_frequency <- merge(fia_grid_spcd_tree_count, fia_grid_total_count, by = "id", all.x = TRUE)
+fia_grid_frequency <- fia_grid_frequency %>%
+  mutate(frequency = SPCD_tree_count/Total_tree_count * 100)
+
+ggplot(data = fia_grid_frequency[fia_grid_frequency$spcd == 131,]) +
+  geom_point(aes(x = centroid_long.x, y = centroid_lat.x, color = frequency))
+
+TREEcn_abundance <- function(number){
+  top_three <- fia_grid_frequency %>%
+    arrange(frequency) %>%
+    slice(1:3)
+  ggplot(data = fia_grid_frequency[fia_grid_frequency$id == number,]) +
+    geom_point(aes(x = centroid_long.x, y = centroid_lat.x, color = frequency()))
+}
+
+two_ggplot <- function(spcd1, spcd2){
+  plot1 <- ggplot(data = fia1[fia1$spcd == spcd1,]) +
+    geom_point(aes(x = long, y = lat, color = frequency))
+  plot2 <- ggplot(data = fia1[fia1$spcd == spcd2,]) +
+    geom_point(aes(x = long, y = lat, color = frequency))
+  ggarrange(plot1, plot2)
+}
+
+plot1 <- ggplot(data = fia1[fia1$spcd == 111,]) +
+  geom_point(aes(x = long, y = lat, color = frequency))
+plot2
+plot2 <- ggplot(data = fia1[fia1$spcd == 222,]) +
+  geom_point(aes(x = long, y = lat, color = frequency))
+
+two_ggplot(222)
+ 
+most_abundant <- function(number){
+  fia2 <- fia1 %>%
+    group_by(spcd) %>%
+    summarize(spcd_total = sum(Total_tree_count)) %>%
+    arrange(-spcd_total)
+  fia3 <- fia2[1:number,]$spcd
+  return(fia3)
+}
+
+most_abundant(3)
+
+fia2[1:3,]$spcd
+
+
+fia2 <- fia1 %>%
+  group_by(spcd) %>%
+  summarize(spcd_total = sum(Total_tree_count)) %>%
+  arrange(-spcd_total)
+
+
+
+
+
+head(fia2)
+
+library(cowplot)
+library(GridExtra)
+library(ggpubr)
+install.packages("ggpubr")
+
+
+fia_grid_frequency1 <- fia_grid_frequency[,c(1,2,3,4,5,8,9)]
+head(fia_grid_frequency1)
+names(fia_grid_frequency1)[c(3,4)] <- c("long", "lat")
+head(fia_grid_frequency1)
+fia1 <- fia_grid_frequency1
+
+?slice
+head(fia_grid_frequency)
+names(fia_grid_frequency)
+fia_grid_frequency$id
+fia_grid_frequency$spcd
+
+TREEcn_abundance(78)
+TREEcn_abundance(111)
+
+install.packages(ggpubr)
+library(ggpubr)
+
+##### for loop ####
+numbers <- c(1:10)
+numbers
+1+2+3+4
+
+
+
+sum <- 0
+for (i in 1:10){
+  sum <- sum + i
+}
+print(sum)
+
+original_vector <- c(1,2,3,4,5)
+double_vector <- numeric(length(original_vector))
+numeric(5)
+class(double_vector)
+
+for (i in 1:length(original_vector)){
+  double_vector[i] <- original_vector[i] * 2
+}
+
+print(double_vector)
+
+words <- c("Hello", "World", "in", "R")
+words
+result <- ""
+for (word in words){
+  result <- paste(result, word)
+}
+print(result)
+
+a <- 5
+b <- 7
+if (a < b){
+  print(a)
+}
+
+if (a < b){
+  print(a)
+} else {
+  print(b)
+}
+
