@@ -1,0 +1,42 @@
+library(dplyr)
+library(ggplot2)
+library(sf)
+
+#readRDS from the fia
+fia <- readRDS("fia_select.rds")
+#not used
+ref <- read.csv("REF_SPECIES.csv")
+
+#test to clean up the common name
+boo <- gsub("\\s+$", "", fia$common)
+fia$common <- gsub("\\s+$", "", fia$common)
+#cleaned up fia 
+head(fia)
+
+#calculate grid total stem count
+fia_grid <- fia_subset %>%
+  group_by(GRID20) %>%
+  summarize(total_trees = n_distinct(TREEcn))
+head(fia_grid)
+
+fia_spcd <- fia %>%
+  group_by(GRID20, spcd, common) %>%
+  summarize(spcd_total = n_distinct(TREEcn))
+head(fia_spcd)
+
+
+fia_frequency10 <- merge(fia_grid, fia_spcd, by = "GRID20")
+fia_frequency1 <- fia_frequency10 %>%
+  group_by(GRID20, common) %>%
+  mutate(frequency = 100*(spcd_total/total_trees))
+head(fia_frequency1)
+
+avg_spcd_frequency <- fia_frequency1 %>%
+  group_by(spcd, common) %>%
+  summarise(avg_spcd_frequency = sum(frequency)/n_distinct(GRID20))
+head(avg_spcd_frequency)
+
+spcd_frequency <- function(name){
+  return(avg_spcd_frequency[avg_spcd_frequency$common == name,])
+}
+spcd_frequency("Balsam fir")  
