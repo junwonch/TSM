@@ -1,0 +1,92 @@
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+
+getwd()
+setwd("C:/Users/junwo/OneDrive/Desktop/TSM 2")
+
+df <- read.csv("fia_grid_grm_env_beta.csv")
+
+head(df)
+names(df)
+nrow(df)
+
+common_df <- df1 %>%
+  select(SPCD, COMMON_NAME)
+common_df <- common_df %>%
+  rename(SPCD == SPCD.x)
+  
+head(common_df)
+
+df[is.na(df)] <- 0
+
+
+ #ggplot + commonname
+df1 <- df %>%
+  select(GRIDID, GRID_LON, GRID_LAT, TREECN, SPCD, COMMON_NAME, DIA)
+
+head(df1)
+summary(df1)
+
+#IV = ('sp' ct / total ct) + ('sp' dia / total dia)
+
+# total_height <- sum(df1$HT)
+
+head(df1$TREECN)
+
+
+grid_df
+total_dia <- sum(df1$DIA)
+total_ct <- length(unique(df1$TREECN))
+
+df5 <- df1 %>%
+  mutate(BA = (DIA/2)^2*pi)
+head(df5)
+
+grid_df <- df5 %>%
+  group_by(GRIDID) %>%
+  summarize(
+    total_BA = sum(BA, na.rm = TRUE),
+    total_count = length(unique(TREECN))) 
+head(grid_df)
+
+spcd_df <- df5 %>%
+  group_by(GRIDID, SPCD) %>%
+  summarize(
+    spcd_BA = sum(BA, na.rm = TRUE),
+    spcd_ct = length(unique(TREECN))
+  )
+head(spcd_df)
+
+df4 <- merge(spcd_df, grid_df, by = "GRIDID")
+head(df4)
+df6 <- merge(df4, df1, by = "GRIDID")
+head(df6)
+df7 <- df6 %>%
+  select(GRIDID, SPCD.x, spcd_BA, spcd_ct, total_BA, total_count, GRID_LON, GRID_LAT)
+head(df7)
+
+IV_df <- df7 %>%
+  mutate(IV = (spcd_BA/total_BA)+(spcd_ct/total_count)*100)
+names(IV_df)[names(IV_df) == "SPCD.x"] <- "SPCD"
+
+head(common_df)
+head(IV_df, 10)
+
+merge(IV_df, common_df, by = SPCD)
+
+
+IV <- function(spcd){
+  iv <- IV_df %>%
+    filter(SPCD==spcd)
+  return(iv)
+}
+IV(111)
+
+IVplot <- function(spcd){
+  lon = IV_df[SPCD == spcd, 7]
+  lat = IV_def[SPCD == spcd, 8]
+  ggplot(IV_df, aes(lon, lat, color = IV) + geom_point()
+         )
+}
+IVplot(111)
