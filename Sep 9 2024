@@ -1,0 +1,26 @@
+mean(mean_IV_df$stm_ct)
+
+mean_IV_df1 <- mean_IV_df %>%
+  filter(stm_ct > 570.186 & mean_IV > 10)
+head(mean_IV_df1, 20)
+selectSP <- mean_IV_df1$common_name
+selectSP
+
+sp_range <- dfm %>%
+  filter(common_name %in% selectSP) %>%
+  group_by(common_name) %>%
+  summarise(N_lat = max(LAT), S_lat = min(LAT)) %>%
+  mutate(range = N_lat - S_lat)
+sp_range
+
+selected_sp <- sp_range %>%
+  filter(N_lat < 49.3)
+selected_sp
+
+  common_name   N_lat S_lat range
+  <chr>         <dbl> <dbl> <dbl>
+1 loblolly pine  42.5  28.4  14.0
+2 silver maple   48.4  31.8  16.6
+3 slash pine     36.0  24.7  11.3
+4 sweetgum       41.4  27.4  14.1
+
