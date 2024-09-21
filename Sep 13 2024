@@ -1,0 +1,28 @@
+
+env <- readRDS("df_grid_env.rds")
+names(env)
+
+ELEV <- ggplot(env, aes(x = GRID_LON, y = GRID_LAT, color = ELEV))+
+  geom_point()
+
+TempMean <- ggplot(env, aes(x = GRID_LON, y = GRID_LAT, color = TempMean))+
+  geom_point()
+
+PrecipMean <- ggplot(env, aes(x = GRID_LON, y = GRID_LAT, color = PrecipMean))+
+  geom_point()
+
+Isothermal <- ggplot(env, aes(x = GRID_LON, y = GRID_LAT, color = Isothermal))+
+  geom_point()
+
+RDEM <- ggplot(env, aes(x = GRID_LON, y = GRID_LAT, color = RDEM))+
+  geom_point()
+
+AET <- ggplot(env, aes(x = GRID_LON, y = GRID_LAT, color = AET))+
+  geom_point()
+
+ggarrange(ELEV, TempMean, PrecipMean, Isothermal, RDEM, AET, ncol = 2, nrow = 3)
+
+#how do model using env
+#make a 2d distribution graph: find mean of each latitude and graph it
+#sweetgum, then all 31 species using for loop
+#grow, temp, elevation, precipitation
