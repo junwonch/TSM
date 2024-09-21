@@ -1,0 +1,71 @@
+dfm31 <- readRDS("dfm31.RDS")
+
+head(dfm31)
+dfm31
+
+head(dfm)
+head(env)
+#temp graph
+head(growLatMean)
+
+growgrow <- dfm %>%
+  filter(common_name == "sweetgum") %>%
+  select(GRIDID, grow)
+head(growgrow)
+
+temptemp <- env %>%
+  select(GRIDID, GRID_LAT, TempMean)
+head(temptemp)
+
+merge(growgrow, temptemp, by.x = "GRIDID")
+
+  
+  group_by(cutLat) %>%
+  summarise(LatTempMean = mean(TempMean))
+head(tempLatMean)
+
+tempLatMeanPlot <- ggplot(tempLatMean, aes(x = cutLat, y = tempLatMean))+ #descending linear
+  geom_point()
+tempLatMeanPlot
+
+#precipitation graph
+precLatMean <- env %>%
+  group_by(GRID_LAT) %>%
+  summarise(precLatMean = mean(PrecipMean))
+head(precLatMean)
+
+precLatMeanPlot <- ggplot(precLatMean, aes(x = GRID_LAT, y = precLatMean))+ #descending linear
+  geom_point()
+precLatMeanPlot #decreases as goes up
+
+#sweetgum grow lat graph
+growLatMean <- dfm %>%
+  filter(common_name == "sweetgum") %>%
+  mutate(cutLat = cut(LAT, breaks = 10, include.lowest = TRUE)) %>%
+  group_by(cutLat) %>%
+  summarise(grow_mean = mean(grow))
+head(growLatMean)
+
+growLatMeanPlot <- ggplot(growLatMean, aes(x = cutLat, y = grow_mean))+
+  geom_point() 
+growLatMeanPlot #kind of a bump in the middle
+
+#tree lat graph function
+
+latDistribution <- function(common){
+  latD <- dfm31 %>%
+    mutate(cutLat = cut(LAT, breaks = 7, include.lowest = TRUE)) %>%
+    group_by(cutLAT) %>%
+    summarise(
+      latNumber = 
+    )
+  ggplot(latD, aes(x = LAT, y = latNumber))+
+    geom_point()
+}
+latDistribution()
+
+#for loop
+
+for ( in dfm31){
+  
+}
