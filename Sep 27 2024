@@ -1,0 +1,50 @@
+#grow vs temp
+head(dfm31)
+head(env)
+
+
+temptemp <- env %>%
+  select(GRIDID, GRID_LAT, TempMean)
+head(temptemp)
+
+growTempdf <- merge(growgrow, temptemp, by.x = "GRIDID")
+head(growTempdf)
+
+growTempPlot <- ggplot(CutgrowTempdf, aes(x = cutTempMean, y = grow_mean)) + 
+  geom_point() +
+  geom_line()
+growTempPlot
+
+CutgrowTempdf <- growTempdf %>%
+  mutate(cutTempMean = cut(TempMean, breaks = 10, include.lowest = TRUE)) %>%
+  group_by(cutTempMean) %>%
+  summarise(grow_mean = mean(grow))
+head(CutgrowTempdf)
+
+#soil
+dfm_env_soil_clean <- readRDS("dfm_env_soil_clean.RDS")
+names(dfm_env_soil_clean)
+nrow(dfm_env_soil_clean)
+
+filtered_Data <- dfm_env_soil_clean %>%
+  filter(common_name == "sweetgum")
+nrow(filtered_Data)
+
+filtered_Data1 <- filtered_Data %>%
+  mutate(env_class = cut(TempMean, breaks = 7, include.lowest = TRUE))
+head(filtered_Data1$env_class)
+
+avg_data <- filtered_Data1 %>%
+  group_by(env_class) %>%
+  summarise(avg_response = mean(grow, na.rm = TRUE),
+            env_mid = ((min(TempMean) + max(TempMean)) / 2))
+head(avg_data)
+
+ggplot(avg_data, aes(x = env_mid, y = avg_response))+
+  geom_point() + 
+  geom_line() +
+  theme_minimal()
+
+commonEnvGraph(common, env) <- function(){
+  
+}
