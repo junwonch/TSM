@@ -1,0 +1,132 @@
+##### 
+
+env_dfm_plot <- function(name, env_factor, env_effect){
+  dfm_subset <- dfm_env_soil_clean %>%
+  filter(common_name == name)
+
+envMean_df <- dfm_subset %>%
+  mutate(cutEnv = cut(!!sym(env_factor), breaks = 10, include.lowest = TRUE)) %>%
+  group_by(cutEnv) %>%
+  summarise(
+    Effect_avg = mean(!!sym(env_effect), na.rm = TRUE),
+    EnvMid = (min(!!sym(env_factor)) + max(!!sym(env_factor)))/2
+  )
+
+ggplot(envMean_df, aes(x = EnvMid, y = Effect_avg))+
+  geom_point()+
+  geom_line()
+}
+
+env_dfm_plot("jack pine", "TempMean", "IV")
+
+unique(dfm_env_soil_clean$common_name)
+
+#####
+# for loop 4 species, IV vs TempMean, IV vs PrecipMean, grow vs Temp, grow vs Precip
+# make a pdf file 4x4 grid of plots
+
+# random forest videos
+
+# read intro of paper, and reword it
+# 1000 words
+
+
+
+
+
+
+
+
+
+
+env_dfm_ggplot <- function(common, factor1, factor2){
+  
+  if (factor1 == sym("LAT")){
+    subset_df <- dfm31 %>%
+      filter(common_name == common) %>%
+      select(GRIDID, LAT, LON)
+    
+    TreeEnv <- env %>%
+      select(GRIDID, !!sym(factor2))
+    
+    dfmEnv <- merge(sweetgum_dfm, TreeEnv, by = "GRIDID") %>%
+      filter(!is.na(LAT)) %>%         
+      mutate(LAT = as.numeric(LAT))
+    
+    dfmEnvPlotData <- dfmEnv %>%
+      mutate(cutLat = cut(LAT, breaks = 10, include.lowest = TRUE)) %>%
+      group_by(cutLat) %>%
+      summarise(
+        meanEnv = mean(!!sym(factor2))
+      )
+    
+    ggplot(dfmEnvPlotData, aes(x = cutLat, y = meanEnv))+
+      geom_point()+
+      geom_line()+
+      theme_minimal()
+  }
+  else {
+    sweetgum_dfm <- dfm31 %>%
+      filter(common_name == "common") %>%
+      select(GRIDID, LAT, LON, !!sym(factor1))
+    
+    TreeEnv <- env %>%
+      select(GRIDID, !!sym(factor2))
+    
+    dfmEnv <- merge(sweetgum_dfm, TreeEnv, by = "GRIDID") %>%
+      filter(!is.na(LAT)) %>%         
+      mutate(LAT = as.numeric(LAT))
+    
+    dfmEnvPlotData <- dfmEnv %>%
+      mutate(cutLat = cut(LAT, breaks = 10, include.lowest = TRUE)) %>%
+      group_by(cutLat) %>%
+      summarise(
+        meanEnv = mean(!!sym(factor2), na.rm = TRUE),
+        meanDfm = mean(!!sym(factor1), na.rm = TRUE)
+      )
+    
+    ggplot(dfmEnvPlotData, aes(x = meanEnv, y = meanDfm))+
+      geom_point()+
+      geom_line()+
+      theme_minimal()
+  }
+}
+
+env_dfm_ggplot("sweetgum", "LAT", "TempMean")
+
+
+
+
+sweetgum_dfm <- dfm31 %>%
+  filter(common_name == "sweetgum") %>%
+  select(GRIDID, LAT, LON, StemCount)
+
+TreeEnv <- env %>%
+  select(GRIDID, TempMean)
+
+dfmEnv <- merge(sweetgum_dfm, TreeEnv, by.x = "GRIDID")
+
+dfmEnvPlotData <- dfmEnv %>%
+  mutate(cutLat = cut(LAT, breaks = 10, include.lowest = TRUE)) %>%
+  group_by(cutLat) %>%
+  summarise(
+    meanEnv = mean(TempMean),
+    meanDfm = mean(StemCount)
+  )
+head(dfmEnvPlotData)
+
+ggplot(dfmEnvPlotData, aes(x = meanEnv, y = meanDfm))+
+  geom_point()+
+  geom_line()+
+  theme_minimal()
+  
+    
+dfmEnvPlotData <- dfmEnv %>%
+  mutate(cutLat = cut(LAT, breaks = 10, include.lowest = TRUE)) %>%
+  group_by(cutLat) %>%
+  summarise(
+    meanEnv = mean(TempMean, na.rm = TRUE),
+    meanDfm = mean(StemCount, na.rm = TRUE)
+  )
+    
+cut(dfmEnv$LAT, breaks = 10, include.lowest = TRUE)
