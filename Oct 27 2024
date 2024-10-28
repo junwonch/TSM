@@ -1,0 +1,86 @@
+library(ggplot2)
+library(dplyr)
+library(ggpubr)
+library(tidyverse)
+library(randomForest)
+
+getwd()
+setwd("C:/Users/junwo/Documents/TSM Local")
+
+tree <- readRDS("FIA_tree_master.RDS")
+head(tree)
+
+
+tree_df <- tree %>%
+  group_by(GRIDID, SPCD) %>%
+  summarise(Growth = sum(FGROWCFAL, na.rm = TRUE),
+            GRM = sum(FGROWCFAL + FMORTCFAL + FREMVCFAL, na.rm = TRUE),
+            GRM_net = sum(FGROWCFAL - FMORTCFAL - FREMVCFAL, na.rm = TRUE),
+            BA = sum(DIA * 0.005454, na.rm = TRUE))
+
+tree_df$SPCD <- as.factor(tree_df$SPCD)
+
+head(tree_df)
+
+
+df_soil <- readRDS("dfm_env_soil_clean.RDS")
+head(df_soil)
+
+df_jw <- df_soil %>%
+  left_join(tree_df, by = c("GRIDID", "SPCD"))
+names(df_jw)
+unique(df_jw$common_name)
+
+head(dfm31)
+species_list <- unique(dfm31$common_name)
+species_list
+
+df_jw1 <- df_jw %>%
+  filter(common_name %in% species_list)
+unique(df_jw1$common_name)
+
+pred <- c("Temp_cold", "PSN", "Precip_dry", "BA")
+response_variable <- "IV"
+
+
+
+fit_rf_per_species <- function(data, common, env_variables, response_variable, ntree = 500) {
+  species_data <- data %>%
+    filter(common_name == common)
+  names(species_data)
+  
+  rf_model <- randomForest(
+    as.formula(paste(response_variable, "~", paste(env_variables, collapse = " + "))),
+    data = species_data,
+    ntree = ntree,
+    imporance = TRUE
+  )
+  
+  var_explained <- rf_model$rsq[length(rf_model$rsq)]
+  
+  var_importance <- importance(rf_model)
+  
+  list(model = rf_model, var_explained = var_explained, var_importance = var_importance, species = common)
+}
+fit_rf_per_species(df_jw1, "red maple", pred, "GRM_")
+
+var_explained <- rf_model$rsq[length(rf_model$rsq)]
+var_explained
+
+
+rf_growth <- lapply(species_list, function(common) {
+  fit_rf_per_species(df_jw1, common, pred, "GRM")
+}
+)
+
+rf_growth[[12]]$var_explained
+
+rf_r2_pred_growth <- data.frame(
+  species = sapply(rf_growth, function(x) x$species),
+  var_explained = sapply(rf_growth, function(x) x$var_explained)
+)
+
+rf_r2_pred_growth
+
+rf_r2_pred_growth %>%
+  filter(var_explained > 0.5)
