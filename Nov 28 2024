@@ -1,0 +1,41 @@
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+library(randomForest)
+
+getwd()
+
+#raw tables
+
+Woodall2013_Table1 <- read.csv("2013WoodallTable1.csv")
+Woodall2013_Table1
+
+names(Woodall2013_Table1)[names(Woodall2013_Table1) == "Common.name.Latin.name"] <- "common_name"
+names(Woodall2013_Table1)[names(Woodall2013_Table1) == "X"] <- "latin_name"
+
+
+Woodall2013_Table2 <- read.csv("2013WoodallTable2_csv.csv")
+head(Woodall2013Table2)
+names(Woodall2013_Table2)
+
+
+Zhu2014_Table1 <- read.csv("Book1.csv")
+head(Zhu2014_Table1)
+names(Zhu2014_Table1)
+
+
+Woodall2010_Table1 <- read.csv("woodall2010.csv")
+head(Woodall2010_Table1)
+
+
+  
+#merge
+head(df_yk)
+common_spcd <- df_yk %>%
+  select(SPCD, common_name) %>%
+  distinct(SPCD, .keep_all = TRUE)
+write.csv(common_spcd, "common_spcd.csv")
+
+Woodall2013_Table1_test <- left_join(Woodall2013_Table1, common_spcd, by = "common_name")
+head(Woodall2013_Table1_test)
+summary(Woodall2013_Table1_test)
